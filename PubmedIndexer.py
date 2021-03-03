@@ -129,8 +129,9 @@ class PubmedIndexer:
         if os.path.exists(indexpath):
             os.rmdir(indexpath)
 
-    def index_docs(self, articles: List[PubmedArticle],
-                   limit: int = 10000000) -> None:
+# This indexes on my machine at a rate of about 750 articles/second , (45,000)/min, 270k/hr
+    def index_docs(self, articles: List[PubmedArticle], 
+                   limit: int = 10_000_000) -> None:
         """"
         indexes documents into the Whoosh index
 
@@ -226,13 +227,13 @@ def test_with_new_index():
     """
     print("now", datetime.now())
     pubmed_indexer = PubmedIndexer()
-    pubmed_indexer.mk_index(overwrite=True)
+    pubmed_indexer.mk_index(indexpath='small_index_dir',overwrite=True)
     reader = PubmedReader()
     print("now", datetime.now())
     print("starting reader")
-    articles = reader.process_xml_frags('data2', max_article_count=1000)
+    articles = reader.process_xml_frags('small_index/small_index', max_article_count=1_000_000)
     print("starting indexer")
-    pubmed_indexer.index_docs(articles, limit=1000)
+    pubmed_indexer.index_docs(articles, limit=1_000_000)
     print("done indexing")
     print("now", datetime.now())
     pubmed_indexer.search("disease")
@@ -249,3 +250,6 @@ def test_with_existing_index():
     print("now", datetime.now())
     print("ran Query")
     return pubmed_indexer
+
+if __name__ == "__main__":
+    test_with_new_index()
